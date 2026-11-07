@@ -3,79 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SMS Active Mini App</title>
-  <!-- Telegram Web App SDK -->
+  <title>TH-DATA Intelligence & Screening Panel</title>
+  <!-- Telegram Mini App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg-main: #f8fafc;
-      --sidebar-bg: #1e293b;
-      --yellow-accent: #facc15;
-      --card-bg: #ffffff;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --border-color: #e2e8f0;
+      --bg-dark: #0b0f19;
+      --card-bg: #151c2c;
+      --card-border: #232d42;
+      --accent-blue: #38bdf8;
+      --accent-green: #22c55e;
+      --accent-yellow: #facc15;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
     }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-main); color: var(--text-main); margin: 0; padding: 15px; }
-    .container { max-width: 600px; margin: 0 auto; }
-    
-    .header-bar { display: flex; justify-content: space-between; align-items: center; background: #1e293b; color: #fff; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-    .balance-badge { background: var(--yellow-accent); color: #000; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 14px; }
 
-    h2 { font-size: 18px; margin-bottom: 12px; color: #1e293b; border-bottom: 2px solid var(--border-color); padding-bottom: 6px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-dark); color: var(--text-main); padding: 20px; line-height: 1.5; }
+    .container { max-width: 1000px; margin: 0 auto; }
 
-    /* Service Grid */
-    .services-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
-    .service-btn { background: #fff; border: 2px solid var(--border-color); border-radius: 8px; padding: 10px 5px; text-align: center; cursor: pointer; font-size: 12px; font-weight: bold; transition: 0.2s; }
-    .service-btn:hover, .service-btn.selected { border-color: #000; background: #0f172a; color: #fff; }
+    /* Header & Config */
+    .header { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--card-border); margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+    .header h1 { font-size: 20px; color: var(--accent-blue); display: flex; align-items: center; gap: 8px; }
+    .balance-box { background: rgba(56, 189, 248, 0.1); border: 1px solid var(--accent-blue); padding: 8px 16px; border-radius: 8px; font-weight: bold; color: var(--accent-blue); }
 
-    /* Countries Grid */
-    .country-list { display: flex; flex-direction: column; gap: 10px; }
-    .country-item { background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
-    .country-item:hover { border-color: #38bdf8; background: #f1f5f9; }
-    .c-name { font-weight: bold; font-size: 14px; }
-    .c-stock { font-size: 11px; color: #16a34a; font-weight: bold; }
-    .c-price { background: #0f172a; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 13px; font-weight: bold; }
+    .token-bar { display: flex; gap: 10px; width: 100%; margin-top: 10px; }
+    .token-bar input { flex-grow: 1; background: var(--bg-dark); border: 1px solid var(--card-border); padding: 10px 14px; border-radius: 6px; color: #fff; font-size: 14px; }
+    .token-bar button { background: var(--accent-blue); border: none; color: #000; font-weight: bold; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+    .token-bar button:hover { opacity: 0.9; }
 
-    /* Modal */
-    #orderModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 1000; }
-    .modal-box { background: #fff; width: 90%; max-width: 400px; padding: 25px; border-radius: 12px; text-align: center; color: #000; }
-    .phone-box { font-size: 22px; font-weight: bold; color: #0284c7; background: #f1f5f9; padding: 10px; border-radius: 6px; margin: 15px 0; word-break: break-all; }
-    .code-box { font-size: 24px; font-weight: 900; color: #16a34a; background: #dcfce7; padding: 12px; border-radius: 8px; margin-top: 15px; border: 2px dashed #22c55e; }
-    .action-btn { background: #ef4444; color: #fff; border: none; padding: 10px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 20px; font-size: 15px; }
-  </style>
-</head>
-<body>
+    /* Task Submission Card */
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+    .card h2 { font-size: 16px; margin-bottom: 15px; color: var(--text-main); border-bottom: 1px solid var(--card-border); padding-bottom: 10px; }
 
-<div class="container">
-  <div class="header-bar">
-    <span>⚡ SMS ACTIVE MINI APP</span>
-    <div class="balance-badge" id="balanceDisplay">0.00$</div>
-  </div>
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; font-weight: bold; }
+    .form-group select, .form-group input[type="text"], .form-group input[type="file"] {
+      width: 100%; background: var(--bg-dark); border: 1px solid var(--card-border); color: #fff; padding: 10px; border-radius: 6px; font-size: 14px;
+    }
 
-  <h2>Select Service</h2>
-  <div class="services-grid" id="servicesGrid">
-    <!-- Populated by JS -->
-  </div>
+    .btn-submit { background: var(--accent-green); color: #000; border: none; font-weight: bold; width: 100%; padding: 12px; border-radius: 6px; font-size: 16px; cursor: pointer; transition: 0.2s; }
+    .btn-submit:hover { opacity: 0.9; }
+    .btn-submit:disabled { background: var(--card-border); color: var(--text-muted); cursor: not-allowed; }
 
-  <h2>Available Countries</h2>
-  <div class="country-list" id="countryList">
-    <p style="color: var(--text-muted); text-align: center;">Select a service above to view stock.</p>
-  </div>
-</div>
-
-<!-- Order Modal -->
-<div id="orderModal">
-  <div class="modal-box">
-    <h3>Active Activation</h3>
-    <p>Your rented phone number:</p>
-    <div class="phone-box" id="modalPhone">Connecting...</div>
-    <div class="code-box" id="modalCode">Waiting for SMS code...</div>
-    <button class="action-btn" onclick="closeModal()">Close / Cancel</button>
-  </div>
-</div>
-
-<script src="app.js"></script>
-</body>
-</html>
+    /* Progress & Active Task */
+    .progress-box { display: none; background: var(--bg-dark); border: 1px solid var(--card-border); padding: 15px; border-radius: 8px; margin-top: 20px; }
+    .progress-bar-bg { background: var(--card-border); height: 10px; border-radius: 5px; overflow: hidden; margin: 10px 0; }
+    .progress-bar-fill { background: var(--accent-blue); width: 0%; height: 100%; transition: width 0.3s; }
+    .btn-download { display: none; background: var(--accent-yellow); color: #000; border: none; font-weight: bold; width: 100%; padding: 12px; border-radius: 6
