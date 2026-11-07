@@ -3,44 +3,103 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SMS Activation Hub</title>
+  <title>SMS Active - Professional Panel</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { font-family: Arial, sans-serif; background: #0f172a; color: #fff; margin: 0; padding: 20px; }
-    .container { max-width: 600px; margin: 0 auto; background: #1e293b; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-    h1 { margin-top: 0; color: #38bdf8; text-align: center; }
-    .balance-card { background: #334155; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 18px; text-align: center; }
-    button { background: #38bdf8; border: none; color: #0f172a; padding: 12px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 10px; font-size: 16px; }
-    button:hover { background: #7dd3fc; }
-    select { width: 100%; padding: 12px; margin-top: 8px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; box-sizing: border-box; font-size: 16px; }
-    label { font-weight: bold; color: #94a3b8; }
-    .code-box { background: #0284c7; padding: 15px; border-radius: 8px; margin-top: 15px; text-align: center; font-size: 20px; font-weight: bold; word-break: break-all; }
+    :root {
+      --bg-main: #f8fafc;
+      --sidebar-bg: #1e293b;
+      --yellow-accent: #facc15;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --primary: #ef4444;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-main); color: var(--text-main); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+    
+    /* Sidebar */
+    .sidebar { width: 240px; background: var(--sidebar-bg); color: #fff; display: flex; flex-direction: column; border-right: 1px solid #334155; }
+    .logo-box { background: var(--yellow-accent); color: #000; padding: 20px; font-weight: 900; font-size: 20px; letter-spacing: 1px; }
+    .nav-links { list-style: none; padding: 0; margin: 20px 0; flex-grow: 1; }
+    .nav-links li { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-weight: 500; color: #cbd5e1; transition: 0.2s; }
+    .nav-links li:hover, .nav-links li.active { background: rgba(255,255,255,0.1); color: #fff; border-left: 4px solid var(--yellow-accent); }
+
+    /* Main Content Area */
+    .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
+    .topbar { background: #fff; padding: 15px 30px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+    
+    .content-body { padding: 30px; max-width: 1200px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+    h2 { font-size: 22px; margin-bottom: 15px; border-bottom: 2px solid var(--border-color); padding-bottom: 8px; }
+
+    /* Service Categories Grid */
+    .grid-section { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-bottom: 30px; }
+    .service-card { background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 8px; padding: 15px; text-align: center; cursor: pointer; transition: 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .service-card:hover, .service-card.selected { border-color: #000; transform: translateY(-2px); }
+    .service-card.selected { background: #0f172a; color: #fff; }
+    .service-card img { width: 32px; height: 32px; margin-bottom: 8px; }
+    .service-name { font-weight: bold; font-size: 14px; }
+
+    /* Countries Stock Grid */
+    .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px; }
+    .country-card { background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 8px; padding: 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
+    .country-card:hover { border-color: #38bdf8; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .country-info .c-name { font-weight: bold; font-size: 15px; }
+    .country-info .c-stock { font-size: 12px; color: #16a34a; font-weight: bold; margin-top: 3px; }
+    .country-price { background: #0f172a; color: #fff; padding: 8px 14px; border-radius: 6px; font-weight: bold; font-size: 14px; }
+
+    /* Active Order Modal / Box */
+    #activeOrderModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
+    .modal-content { background: #fff; padding: 30px; border-radius: 12px; width: 450px; text-align: center; color: #000; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    .phone-display { font-size: 24px; font-weight: bold; color: #0284c7; background: #f1f5f9; padding: 12px; border-radius: 6px; margin: 15px 0; }
+    .code-display { font-size: 28px; font-weight: 900; color: #16a34a; background: #dcfce7; padding: 15px; border-radius: 8px; margin-top: 15px; border: 2px dashed #22c55e; }
+    .close-btn { background: #ef4444; color: #fff; border: none; padding: 10px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 20px; width: 100%; }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <h1>⚡ Virtual SMS Hub</h1>
-  <div class="balance-card">
-    Status: <span id="systemStatus" style="color: #4ade80;">Ready</span>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="logo-box">SMS ACTIVE</div>
+    <ul class="nav-links">
+      <li class="active">🛒 Buy Number</li>
+      <li>💰 Balance: <span id="userBalanceDisplay">0.00$</span></li>
+      <li>👤 Profile</li>
+      <li>🎧 Support</li>
+      <li>⚙️ API Docs</li>
+    </ul>
   </div>
 
-  <h3>Rent a Number</h3>
-  <label for="service">Select Service:</label>
-  <select id="service">
-    <option value="wa">WhatsApp ($0.50)</option>
-    <option value="tg">Telegram ($0.50)</option>
-    <option value="go">Google/Gmail ($0.40)</option>
-  </select>
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="topbar">
+      <span>SMS ACTIVATION PANEL</span>
+      <span id="apiStatus" style="color: #16a34a; font-size: 14px;">● API Connected</span>
+    </div>
 
-  <button onclick="buyNumber()">Get Number</button>
+    <div class="content-body">
+      <h2>Select Service</h2>
+      <div class="grid-section" id="servicesGrid">
+        <!-- Dynamically loaded services -->
+      </div>
 
-  <div id="activeOrder" style="display:none; margin-top:20px;">
-    <h3>Active Number</h3>
-    <p>Number: <span id="phoneNumber" style="color:#38bdf8; font-size:20px; font-weight:bold;"></span></p>
-    <div class="code-box" id="smsCode">Waiting for SMS code...</div>
+      <h2 id="countryHeader">Available Countries & Prices</h2>
+      <div class="country-grid" id="countriesGrid">
+        <p style="color: var(--text-muted);">Please select a service above first.</p>
+      </div>
+    </div>
   </div>
-</div>
+
+  <!-- Active Order Modal -->
+  <div id="activeOrderModal">
+    <div class="modal-content">
+      <h3>Active Order Assigned</h3>
+      <p>Your rented phone number:</p>
+      <div class="phone-display" id="modalPhone">Loading...</div>
+      <div class="code-display" id="modalCode">Waiting for SMS code...</div>
+      <button class="close-btn" onclick="closeModal()">Close / Cancel Order</button>
+    </div>
+  </div>
 
 <script src="app.js"></script>
 </body>
